@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kenzi Garden - Mağaza Paneli</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Harici Özel CSS Dosyamız -->
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-stone-100 min-h-screen p-6">
+
+  <!-- Giriş Kutusu -->
+  <div id="login-box" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-md mt-20">
+    <h2 class="text-2xl font-bold mb-6 text-center text-[#4A3525]">Kenzi Garden Admin Girişi</h2>
+    <input type="email" id="email" placeholder="E-posta" class="w-full border p-3 rounded-lg mb-4 focus:outline-none focus:border-[#2D4A3E]">
+    <input type="password" id="password" placeholder="Şifre" class="w-full border p-3 rounded-lg mb-6 focus:outline-none focus:border-[#2D4A3E]">
+    <button onclick="login()" class="w-full bg-[#2D4A3E] text-white py-3 rounded-lg font-bold hover:opacity-90 transition-custom">Giriş Yap</button>
+  </div>
+
+  <!-- Yönetim Ekranı -->
+  <div id="admin-dashboard" class="max-w-4xl mx-auto hidden">
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-2xl font-bold text-[#4A3525]">Mağaza Yönetim Paneli</h1>
+      <button onclick="logout()" class="bg-stone-200 text-stone-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-stone-300 transition-custom">Çıkış Yap</button>
+    </div>
+
+    <!-- Ürün Ekleme Formu -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm mb-8">
+      <h3 class="font-bold text-lg mb-4 text-[#4A3525]">Yeni Ürün / Çiçek Ekle</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="text" id="p-name" placeholder="Ürün Adı (Örn: Paşa Kılıcı)" class="border p-3 rounded-lg focus:outline-none focus:border-[#2D4A3E]">
+        <input type="number" id="p-price" placeholder="Fiyat (TL)" class="border p-3 rounded-lg focus:outline-none focus:border-[#2D4A3E]">
+        <input type="text" id="p-cat" placeholder="Kategori (Örn: İç Mekan Bitkisi)" class="border p-3 rounded-lg focus:outline-none focus:border-[#2D4A3E]">
+        <input type="text" id="p-img" placeholder="Resim Bağlantısı (URL)" class="border p-3 rounded-lg focus:outline-none focus:border-[#2D4A3E]">
+        <input type="text" id="p-desc" placeholder="Kısa Açıklama / Bakım Bilgisi" class="border p-3 rounded-lg col-span-full focus:outline-none focus:border-[#2D4A3E]">
+      </div>
+      <button onclick="addProduct()" class="mt-4 bg-[#2D4A3E] text-white px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-custom">Ürünü Sitede Yayınla</button>
+    </div>
+
+    <!-- Ürün Listesi -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm">
+      <h3 class="font-bold text-lg mb-4 text-[#4A3525]">Sitedeki Mevcut Ürünler</h3>
+      <div id="product-list" class="space-y-4"></div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase Yapılandırması (Kendi anahtarlarınızla değiştirin)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAaxzHiu1Ya-Wcni1RT7Rso4phrJ-ppeoE",
+      authDomain: "kenzi-garden.firebaseapp.com",
+      projectId: "kenzi-garden",
+      storageBucket: "kenzi-garden.firebasestorage.app",
+      messagingSenderId: "537211811884",
+      appId: "1:537211811884:web:477222a1e7de3167367989",
+      measurementId: "G-QPGDBD1EJ6"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Oturum Durumu Kontrolü
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        document.getElementById('login-box').classList.add('hidden');
+        document.getElementById('admin-dashboard').classList.remove('hidden');
+        loadProducts();
+      } else {
+        document.getElementById('login-box').classList.remove('hidden');
+        document.getElementById('admin-dashboard').classList.add('hidden');
+      }
+    });
+
+    function login() {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      auth.signInWithEmailAndPassword(email, pass).catch(err => alert("Giriş Hatası: " + err.message));
+    }
+
+    function logout() { auth.signOut(); }
+
+    function addProduct() {
+      const name = document.getElementById('p-name').value;
+      const price = Number(document.getElementById('p-price').value);
+      const category = document.getElementById('p-cat').value;
+      const image = document.getElementById('p-img').value;
+      const desc = document.getElementById('p-desc').value;
+
+      if(!name || !price) { alert("Lütfen ürün adı ve fiyatını yazın."); return; }
+
+      db.collection("products").add({ name, price, category, image, desc })
+        .then(() => {
+          alert("Ürün başarıyla eklendi!");
+          document.getElementById('p-name').value = '';
+          document.getElementById('p-price').value = '';
+          document.getElementById('p-cat').value = '';
+          document.getElementById('p-img').value = '';
+          document.getElementById('p-desc').value = '';
+        });
+    }
+
+    function loadProducts() {
+      db.collection("products").onSnapshot((snapshot) => {
+        const list = document.getElementById('product-list');
+        list.innerHTML = '';
+        snapshot.forEach((doc) => {
+          const item = doc.data();
+          list.innerHTML += `
+            <div class="flex justify-between items-center border-b pb-3">
+              <div class="flex items-center gap-4">
+                <img src="${item.image || 'https://via.placeholder.com/50'}" class="w-12 h-12 object-cover rounded-lg">
+                <div>
+                  <p class="font-bold">${item.name}</p>
+                  <p class="text-xs text-gray-500">${item.price} TL - ${item.category || 'Kategorisiz'}</p>
+                </div>
+              </div>
+              <button onclick="deleteProduct('${doc.id}')" class="text-red-600 font-semibold text-sm hover:underline">Siteden Kaldır</button>
+            </div>
+          `;
+        });
+      });
+    }
+
+    function deleteProduct(id) {
+      if(confirm("Bu ürünü silmek istediğinize emin misiniz?")) {
+        db.collection("products").doc(id).delete();
+      }
+    }
+  </script>
+</body>
+</html>

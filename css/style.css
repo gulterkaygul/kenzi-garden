@@ -1,0 +1,44 @@
+/* KENZI GARDEN - Özel Stil Dosyası */
+
+/* Renk Değişkenleri (Logo ve Konsept) */
+:root {
+  --bg-cream: #F9F6F0;
+  --brand-brown: #4A3525;
+  --brand-green: #2D4A3E;
+  --whatsapp-green: #25D366;
+}
+
+/* Genel Sayfa Ayarları */
+body {
+  background-color: var(--bg-cream);
+  color: var(--brand-brown);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Yumuşak Geçişler */
+.transition-custom {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Özel Kart Gölgesi */
+.product-card {
+  border: 1px solid rgba(74, 53, 37, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(74, 53, 37, 0.08);
+}
+
+/* Kaydırma Çubuğu (Scrollbar) Tasarımı */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F9F6F0;
+}
+::-webkit-scrollbar-thumb {
+  background: #2D4A3E;
+  border-radius: 4px;
+}
