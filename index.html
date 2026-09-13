@@ -192,7 +192,7 @@
       message += `\n*Toplam Tutar:* ${total} TL`;
 
       const encodedMessage = encodeURIComponent(message);
-      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
+      window.location.href = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodedMessage}`;
     }
   </script>
 </body>
